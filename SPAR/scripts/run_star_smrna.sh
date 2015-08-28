@@ -111,7 +111,7 @@ ${SAMTOOLS} index ${starOutDir}/Aligned.out.filtered.sorted.bam
 
 # compute stats
 #echo "`date +'%b %d %H:%M:%S'` ..... Computing stats"
-printT "Computing stats"
+printT "Computing mapping stats"
 statFile=${starOutDir}/MAPSTAT.txt
 >${statFile}
 nFastQReads=$(grep -e "Number of input reads" ${starOutDir}/Log.final.out | cut -f 2)

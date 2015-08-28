@@ -32,7 +32,17 @@ function runScript
   bash ${SPARPATH}/scripts/$1
 }
 
-echo -e "Output directory: ${OUTDIR}\n"
+function printT
+{
+  echo "`date +'%b %d %H:%M:%S'` ..... $1" | tee -a ${LOGSPAR}
+}
+
+function printL
+{
+  echo -e "$1" | tee -a ${LOGSPAR}
+}
+
+printL "Output directory:\n${OUTDIR}\n"
 
 printT "SPAR run started"
 
@@ -58,23 +68,26 @@ runScript "annotate_segm2.sh ${OUTBAM}.neg.bedgraph.segm"
 
 printT "DONE."
 
-echo "Mapping output:" | tee -a ${LOGSPAR}
-echo "${OUTBAM}" | tee -a ${LOGSPAR}
+printL "\n===Output==="
+printL "Output directory: ${OUTDIR}"
+printL "\nMapping output:"
+printL "${OUTBAM}"
 
-echo "Annotation output:" | tee -a ${LOGSPAR}
+printL "Annotation output:"
 ls ${OUTBAM}.*.bedgraph.segm.annot.final | tee -a ${LOGSPAR}
 
-echo "Un-annotated output:" | tee -a ${LOGSPAR}
+printL "Un-annotated output:" 
 ls ${OUTBAM}.*.bedgraph.segm.unannotated.bed | tee -a ${LOGSPAR}
 
-echo -e "\n\n===Run summary===" | tee -a ${LOGSPAR}
+printL "\n\n===Run summary==="
+printL "FASTQ: ${TRIMFASTQ}"
 grep -e "Reads \[all\]" ${OUTDIR}/MAPSTAT.txt | awk 'BEGIN{FS="\t"}{printf "Mapped reads: %d [%.4f%%]\n", $2, $3}' | tee -a ${LOGSPAR}
 
 numAnnot=$(cat ${OUTBAM}.*.bedgraph.segm.annot.final | wc -l)
-echo "Annotated loci count: ${numAnnot}" | tee -a ${LOGSPAR}
-echo "Annotated loci by RNA class:" | tee -a ${LOGSPAR}
+printL "Annotated loci count: ${numAnnot}"
+printL "Annotated loci by RNA class:"
 cat ${OUTBAM}.*.bedgraph.segm.annot.final | cut -f 19 | sort | uniq -c | awk 'BEGIN{OFS="\t"}{print $2,$1}' | sort -k2,2nr | tee -a ${LOGSPAR}
 
 numUnannot=$(cat ${OUTBAM}.*.bedgraph.segm.unannotated.bed | wc -l)
-echo -e "\nUn-annotated loci count: ${numUnannot}" | tee -a ${LOGSPAR}
+printL "\nUn-annotated loci count: ${numUnannot}"
 
