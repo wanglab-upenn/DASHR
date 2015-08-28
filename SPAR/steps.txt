@@ -1,0 +1,52 @@
+
+1) Trimming 
+
+### USERS must provide their adapters or select from the lists of commonly used Illumina smRNA-seq adapters:
+/mnt/niagads/users/yyee/data/illumina_smrna_truseq_3adapter.fas
+/mnt/niagads/users/yyee/data/illumina_smrna_1.0_3adapter.fas
+/mnt/niagads/users/yyee/data/illumina_smrna_1.5_3adapter.fas
+/mnt/niagads/users/yyee/data/illumina_standard.fas
+
+# need smrna_step_trim3.sh
+# need run_cutadapt.sh
+
+
+2) ## run STAR on the trimmed fastq files 
+INPUT FASTQ:
+FASTQ files should be named as:
+<tissue>_<SRR>_trimmed.fastq
+<tissue>_<SRR>_rawreads.fastq
+where <tissue> is, e.g., brain1, liver1, etc.
+<SRR> is e.g. SRA run name SRR772426
+
+bash run_star_smrna.sh fastq_samples_list_renamed 
+
+3) ## the above steps are for individual samples, if you want to perform per tissue study, 
+you can group the samples together as: 
+samtools merge adipose_star_hc.bam 
+star_m0_map100_adipose_SRR772426/Aligned.out.filtered.hardClipped.sorted.bam  
+star_m0_map100_adipose_SRR772427/Aligned.out.filtered.hardClipped.sorted.bam  
+
+# make sure you sort them for further analysis
+samtools sort adipose_star_hc.bam adipose_star_hc_sorted
+samtools index adipose_star_hc_sorted.bam 
+rm adipose_star_hc.bam
+
+# create a list of bam files per individual samples
+bam_list_star_hardclipped_samples
+
+# create a list of bam files per tissues 
+bam_list_star_hardclipped_tissues
+
+4) ## convert tissues' multi-mapped bam to bedgraphs 
+bash run_qsub.sh bam_to_bedgraph.sh  bam_list_star_hardclipped_tissues
+
+5) ## convert tissues' multi-mapped bedgraphs to bigwig
+bash convert_bedgraph_to_bigwig.sh  bam_list_star_multi_hardclipped_tissues
+
+6) ## segmentation
+
+bash segment_bedgraph.sh 'tissue'_star_hc_sorted.bam.pos.bedgraph > tissue_multi_pksem_pos.bed 
+bash segment_bedgraph.sh 'tissue'_star_hc_sorted.bam..neg.bedgraph > tissue_multi_pksem_neg.bed 
+
+7) ## annotation 
