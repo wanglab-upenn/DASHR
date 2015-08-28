@@ -1,6 +1,8 @@
 
 source config.sh
 
+set -e
+
 INFASTQ=$1
 
 if [ ! -f ${INFASTQ} ]; then
@@ -46,7 +48,7 @@ printL "Output directory:\n${OUTDIR}\n"
 
 printT "SPAR run started"
 
-runScript "run_star_smrna.sh ${TRIMFASTQ} ${maxMismatchCnt} ${maxMapCnt} ${OUTDIR}"
+runScript "run_star_smrna2.sh ${TRIMFASTQ} ${maxMismatchCnt} ${maxMapCnt} ${OUTDIR}"
 
 printT "Converting BAM to bedGraph"
 runScript "bam_to_bedgraph.sh ${OUTBAM}"
