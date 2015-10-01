@@ -1,5 +1,6 @@
 # annotate segments / peaks
 
+set -e
 verbose=0
 # input segmentation (both strands with segment IDs)
 INSEGM=$1 

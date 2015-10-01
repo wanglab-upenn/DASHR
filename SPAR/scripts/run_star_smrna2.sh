@@ -91,7 +91,12 @@ ${SAMTOOLS} sort -@ 4 -O bam ${starOutDir}/Aligned.out.filtered.sam -T ${starOut
 
 # hard-clip filtered sorted BAM file
 printT "Hard-clipping filtered sorted BAM"
-${SAMTOOLS} view -h -@ 4 ${starOutDir}/Aligned.out.filtered.sorted.bam | awk 'BEGIN {OFS="\t"}{if ($0~/^@/) {print; next}; split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S") {$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S") {L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); }; gsub(/[0-9]*S/,"",$6); print}' | ${SAMTOOLS} view -@ 4 -bS - > ${starOutDir}/Aligned.out.filtered.hardClipped.sorted.bam
+#${SAMTOOLS} view -h -@ 4 ${starOutDir}/Aligned.out.filtered.sorted.bam | awk 'BEGIN {OFS="\t"}{if ($0~/^@/) {print; next}; split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S") {$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S") {L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); }; gsub(/[0-9]*S/,"",$6); print}' | ${SAMTOOLS} view -@ 4 -bS - > ${starOutDir}/Aligned.out.filtered.hardClipped.sorted.bam
+
+STATCIGAR=${starOutDir}/cigar.stat
+>${STATCIGAR}
+${SAMTOOLS} view -h -@ 4 ${starOutDir}/Aligned.out.filtered.sorted.bam | awk 'BEGIN {OFS="\t"}{if ($0~/^@/) {print; next}; split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S") {$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S") {L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); }; gsub(/[0-9]*S/,"",$6); print; cigar=$6; cigarCnt[cigar]++;}END{for (c in cigarCnt) print c, cigarCnt[c] > "'${STATCIGAR}'"}' | ${SAMTOOLS} view -@ 4 -bS - > ${starOutDir}/Aligned.out.filtered.hardClipped.sorted.bam
+sort -k2,2nr ${STATCIGAR} -o ${STATCIGAR}
 
 # index BAM
 printT "Indexing BAM"
